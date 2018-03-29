@@ -1,5 +1,5 @@
 # web-technology
-HTML, CSS, JavaScript, Bootstrap, AJAX, JSON, Jquery, Android, IOS
+HTML, CSS, JavaScript, Bootstrap, AJAX, JSON, XML, Jquery, AngularJS, Node.js, Android, IOS
 
 ## JavaScript + JSONParse
 
