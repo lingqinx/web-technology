@@ -1,0 +1,57 @@
+body {
+    
+    background-image: url("http://cs-server.usc.edu:45678/hw/hw8/images/background.png");}
+.container{
+    padding-top: 60px;
+}
+#EnterSymbol:after {
+    content:"*" ;
+    color:red;   
+}
+.gold{
+    border-color: rgb(255,255,0);
+    color: rgb(255,255,0);
+}
+.line{
+    padding-top: 2px;
+    line-height: 1px;
+    background-color: rgb(117,117,117);
+}
+md-autocomplete md-progress-linear { 
+    display: none; 
+}
+.panel-heading {
+    padding-bottom: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0;
+}
+#favorite_list{
+   padding-left:10px;
+}
+#buttons{
+    padding-right: 10px;
+    padding-bottom: 0;
+}
+.view-page.ng-animate {
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.1s;
+
+  position:absolute;
+
+}
+.view-page.ng-enter{
+
+    left:-100px;
+}
+.view-page.ng-enter.ng-enter-active{
+   
+    left:0px;
+}
+.view-page.ng-leave{
+
+    left:0px;
+}
+.view-page.ng-leave.ng-leave-active{
+
+      left:-100px;
+}

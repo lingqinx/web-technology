@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+                    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="col-lg-12 col-md-12 col-sm-12" id="chart">
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+        <script>
+            
+            
+            function plotChart(symbol) {
+                var params = renderChartJson(symbol);
+                $.ajax({
+                       beforeSend:function(){
+                       $("#chart").text("Loading chart...");
+                       },
+                       data: {parameters: encodeURIComponent(params)},
+                       url: "http://stockenviroment.us-east-2.elasticbeanstalk.com/stock_price?input="+symbol,
+                       type: 'GET',
+                       success: function(data){
+                       $("#chart").empty();
+
+                       drawChart(data, symbol);
+                       },
+                       error: function(response,txtStatus){
+                       console.log(response,txtStatus)
+                       }
+                       });
+            }
+        
+        function renderChartJson(symbol) {
+            var text = '{"Normalized": false, "NumberOfDays": 1000, "DataPeriod": "Day", "Elements": [{"Symbol": "'+symbol+'", "Type": "price", "Params": ["ohlc"]}]}';
+            $("#chart").text(text)
+            return text;
+        }
+        
+        function drawChart(jsonObj, symbol) {
+            console.log("1111");
+            var DATAArray=new Array();
+            var i =0;
+            for ( var DateTime in jsonObj['Time Series (Daily)']){
+                var Time = Date.UTC(DateTime.split("-")[0],DateTime.split("-")[1]-1,DateTime.split("-")[2],0,0,0,0);
+                
+                DATAArray.push([Time,Number(jsonObj['Time Series (Daily)'][DateTime]['4. close'])]);
+                i=i+1;
+                if(i == 1000){
+                    break;
+                }
+            }
+            $("#chart").text(DATAArray[0]);
+            $('#chart').highcharts('StockChart', {
+                                   
+                                   
+                                   rangeSelector : {
+                                   buttons : [{
+                                              type : 'month',
+                                              count : 1,
+                                              text : '1m'
+                                              }, {
+                                              type : 'month',
+                                              count : 3,
+                                              text : '3m'
+                                              }, {
+                                              type : 'month',
+                                              count : 6,
+                                              text : '6m'
+                                              }, {
+                                              type : 'year',
+                                              count : 1,
+                                              text : '1y'
+                                              },  {
+                                              type : 'all',
+                                              count : 1,
+                                              text : 'All'
+                                              }],
+                                   selected : 0,
+                                   },
+                                   title : {
+                                   text : symbol+' Stock Price'
+                                   },
+                                   yAxis: {
+                                   title: {
+                                   text: 'Stock Value',
+                                   align: 'middle',
+                                   textAlign: 'left'
+                                   }
+                                   },
+                                   series : [{
+                                             name : ' Stock Value',
+                                             data : DATAArray.reverse(),
+                                             type : 'area',
+                                             threshold : null,
+                                             tooltip : {
+                                             valueDecimals : 2,
+                                             valuePrefix: "$"
+                                             },
+                                             
+                                             }]
+                                   });
+       }
+       </script>
+    </body>
+</html>

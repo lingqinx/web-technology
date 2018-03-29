@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+                    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+                        </head>
+    <body>
+        <div class="cont">
+            <div class="col-lg-12 col-md-12 col-sm-12" id="graph">
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+        <script>
+            
+            function drawPrice(symbol) {
+                var params = renderChartJson(symbol);
+                $.ajax({
+                       beforeSend:function(){
+                       $("#graph").text("Loading graph...");
+                       },
+                       data: {parameters: encodeURIComponent(params)},
+                       url: "http://stockenviroment.us-east-2.elasticbeanstalk.com/stock_price?input="+symbol,
+                       type: 'GET',
+                       success: function(data){
+                       $("#graph").empty();
+                       //alert("2");
+                       //$("#graph").text(data);
+                       drawChart(data, symbol);
+                       },
+                       error: function(response,txtStatus){
+                       console.log(response,txtStatus)
+                       }
+                       });
+            }
+        
+        function renderChartJson(symbol) {
+            var text = '{"Normalized": false, "NumberOfDays": 1000, "DataPeriod": "Day", "Elements": [{"Symbol": "'+symbol+'", "Type": "price", "Params": ["ohlc"]}]}';
+            $("#graph").text(text);
+            return text;
+        }
+        
+        function drawChart(jsonObj,symbol) {
+            var DateArray=new Array();
+            var i = 0;
+            for ( var DateTime in jsonObj['Time Series (Daily)']){
+                DateArray.push(DateTime);
+                i++;
+                if(i == 131){
+                    break;
+                }
+            }
+            
+            var times = new Array();
+            var DATAArray=new Array();
+            var DATAArrayV=new Array();
+            
+            var TitleText = symbol+' Stock Price and Volume';
+            var SeriesName = 'Stock Price';
+            
+            for(var i = 0; i<131;i++){
+                
+                var x = "";
+                //console.log(jsonObj['Time Series (Daily)'][DateArray[i]]);
+                //alert("1");
+                DATAArray.push(parseFloat(jsonObj['Time Series (Daily)'][DateArray[i]]['1. open']));
+                //alert("2");
+                DATAArrayV.push(parseFloat(jsonObj['Time Series (Daily)'][DateArray[i]]['5. volume']));
+                //alert("3");
+                x = DateArray[i].substring(5,7)+"/"+DateArray[i].substring(8,10);
+                times.push(x);
+                
+            }
+            
+            //alert(times);
+            //$("#graph").text(times);
+            Highcharts.chart('graph',{
+                             title: {
+                             text: TitleText
+                             },
+                             subtitle: {
+                             text: '<a href="https://www.alphavantage.co/">Source: Alpha Vantage</a>'
+                             },
+                             xAxis: {
+                             categories: times,
+                             reversed: true,
+                             tickInterval: 15,
+                             showLastLabel: true,
+                             
+                             },
+                             yAxis: [{
+                                     type: 'linear',
+                                     tickAmount: 4,
+                                     title: {
+                                     text: 'Stock Price'
+                                     },
+                                     },{
+                                     title: {
+                                     text: 'Volume'
+                                     },
+                                     tickAmount: 4,
+                                     opposite:true,
+                                     
+                                     },],
+                             plotOptions: {
+                             area: {
+                             fillColor: 'rgb(227,226,254)',
+                             marker: {
+                             enabled: false,
+                             radius: 2,
+                             fillColor: 'rgb(0,0,255)',
+                             },
+                             lineWidth: 3,
+                             lineColor: 'rgb(0,0,255)',
+                             threshold: null
+                             }
+                             },
+                             
+                             
+                             
+                             series: [{
+                                      type:'area',
+                                      name: 'Stock Price',
+                                      yAxis: 0,
+                                      color: 'rgb(0,0,255)',
+                                      data: DATAArray
+                                      },{
+                                      type:'column',
+                                      name: 'Volume',
+                                      yAxis: 1,
+                                      color: 'rgb(233,33,0)',
+                                      data: DATAArrayV
+                                      }],
+                             
+                             });
+                             
+        }
+        </script>
+    </body>
+</html>
+
